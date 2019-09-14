@@ -1,3 +1,4 @@
+from sys import argv
 from os import path
 import numpy as np
 import pandas as pd
@@ -51,10 +52,12 @@ def test(filePath, weights, xs='x1'):
 
 
 
-def plotting(X, y, pred_y):
+def plotting(X, y, pred_y, title, acc):
     X = X.drop(['x0'], axis=1)
     plt.plot(X, y, 'o', label='Original data', markersize=10)
     plt.plot(X, pred_y, 'r', label='Fitted line')
+    plt.title(title)
+    plt.suptitle(f"Loss: {acc*100}%", va='top')
     plt.legend()
     plt.show()
 
@@ -78,7 +81,7 @@ def run(d=1):
         print(f"(Trained 1D-model error is:\t {trained_model_error_1d}"
               f"\n ~ {trained_model_error_1d * 100}%")
 
-        plotting(X_train_1d, y_train_1d, pred_ys_train_1d)
+        plotting(X_train_1d, y_train_1d, pred_ys_train_1d, "Trained 1D", trained_model_error_1d)
 
         # TESTING
         X_test_1d, y_test_1d, pred_ys_test_1d = test(test_1d, weights_1d)
@@ -87,7 +90,7 @@ def run(d=1):
         print(f"(Tested 1D-model error is:\t {tested_model_error_1d}"
               f"\n ~ {tested_model_error_1d * 100}%")
 
-        plotting(X_test_1d, y_test_1d, pred_ys_test_1d)
+        plotting(X_test_1d, y_test_1d, pred_ys_test_1d, "Tested 1D", tested_model_error_1d)
 
 
     # 2D
@@ -99,7 +102,7 @@ def run(d=1):
         trained_model_error_2d = round(meanSquaredError(pred_ys_train_2d, y_train_2d), 4)
         print(f"(Trained 2D-model error is:\t {trained_model_error_2d}\n ~ {trained_model_error_2d * 100}%")
 
-        plotting(X_train_2d, y_train_2d, pred_ys_train_2d)
+        plotting(X_train_2d, y_train_2d, pred_ys_train_2d, "Trained 2D", trained_model_error_2d)
 
         # TESTING
         X_test_2d, y_test_2d, pred_ys_test_2d = test(test_2d, weights_2d, xs="'x1', 'x2'")
@@ -108,10 +111,14 @@ def run(d=1):
         print(f"(Tested 2D-model error is:\t {tested_model_error_2d}"
               f"\n ~ {tested_model_error_2d * 100}%")
 
-        plotting(X_test_2d, y_test_2d, pred_ys_test_2d)
+        plotting(X_test_2d, y_test_2d, pred_ys_test_2d, "Tested 2D", tested_model_error_2d)
 
 
     else:
         return "Choose run(1) or run(2)"
 
 run()
+try:
+    run(int(argv[1]))
+except:
+    print("Use '1' or '2' to tell sys.argv what dataset to run")
