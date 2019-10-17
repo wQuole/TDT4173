@@ -69,6 +69,8 @@ def plotting(X, y, pred_y, title, acc, threeDim=False):
         datapoints = ax.scatter(X['x1'], X['x2'], y, marker='v')
         predictions = ax.scatter(X['x1'], X['x2'], pred_y, marker='^')
 
+        plt.title(title)
+        plt.suptitle(f"Loss: {acc * 100}%", va='top')
         ax.legend([datapoints, predictions], ['datapoints', 'predictions'], numpoints=1)
 
         ax.set_xlabel('x1')
