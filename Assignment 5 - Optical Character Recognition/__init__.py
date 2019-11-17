@@ -1,31 +1,54 @@
 import os
 import preprocessing
 import cv2
+import matplotlib.pyplot as plt
 from classification import CharacterClassifier
 from detection import CharacterDetector
 from sklearn.model_selection import train_test_split
+from sklearn.svm.libsvm import predict_proba
 
 RANDOM_STATE = 42
 PROBABILITY = True
 
 if __name__ == '__main__':
     # Load and prep' data
-    chars74k_lite = os.path.abspath('/Users/wquole/PycharmProjects/TDT4173/Assignment 5 - Optical Character Recognition/dataset/chars74k-lite')
+    chars74k_lite = os.path.abspath('/Users/juliagraham/IT/TDT4173/Assignment 5 - Optical Character Recognition/dataset/chars74k-lite')
     images, classes = preprocessing.load_data(chars74k_lite)
     X, y, X_array, y_array = preprocessing.create_dataframe_and_numpy_arrays(images, classes)
     # Split data 80/20
     X_array = preprocessing.pca_transform(X_array, 40)
     X_array = preprocessing.standarscaler_transform(X_array)
     X_train, X_test, y_train, y_test = train_test_split(X_array, y_array, test_size=0.2, shuffle=True, random_state=RANDOM_STATE)
-    X_train, X_test = preprocessing.edge_detection_transform(X_train, X_test)
+    #X_train, X_test = preprocessing.edge_detection_transform(X_train, X_test)
+
     # Classifier
     clf = CharacterClassifier(RANDOM_STATE, PROBABILITY)
-    predictions = clf.mlp_classifier(X_train, X_test, y_train, y_test)
-    print(predictions)
+    #model, predictions = clf.mlp_classifier(X_train, X_test, y_train, y_test)
+    #clf.save_model(model) #saves CharClassifier obj and not model?
+
+    model2 = clf.load_model('/Users/juliagraham/IT/TDT4173/Assignment 5 - Optical Character Recognition/models/model.pkl')
+    img = X_test[0]
+    #print(model2.predict_proba([img]))
+
+
+
     # Detection
-    detection_image = ""
-    d_img = cv2.imread(detection_image, 20, 20)
-    detector = CharacterDetector(d_img)
+    detection_image = '/Users/juliagraham/IT/TDT4173/Assignment 5 - Optical Character Recognition/dataset/detection-images/detection-1.jpg'
+    d_img = cv2.imread(detection_image, cv2.IMREAD_COLOR)
+    detector = CharacterDetector(d_img, 20, 20, model2)
+    viewport = detector.sliding_window(30, (20, 20))
+
+    #print(type(d_img), d_img.shape)
+
+    #plt.imshow(d_img)
+    #plt.show()
+    ##cv2.imshow('image', d_img)
+    ##cv2.waitKey(0)
+    #cv2.destroyAllWindows()
+
+
+    #print(viewport)
+
     #detector.sliding_window()
 
 

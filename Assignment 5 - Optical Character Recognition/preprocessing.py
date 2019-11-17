@@ -66,7 +66,6 @@ def edge_detection(X_train):
 
     return feature_vector, theta_vector# Gradient and edge direction matrices
 
-
 def hog_descriptor(X_train):
     feature_vector = []
     for x in X_train:
