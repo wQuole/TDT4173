@@ -3,7 +3,8 @@ from sklearn.metrics import accuracy_score
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.neural_network import MLPClassifier
 from sklearn.ensemble import RandomForestClassifier
-import joblib
+#import joblib
+import pickle
 
 
 class CharacterClassifier:
@@ -34,14 +35,31 @@ class CharacterClassifier:
 
     def mlp_classifier(self, X_train, X_test, y_train, y_test):
         model = MLPClassifier(hidden_layer_sizes=(860,), random_state=self.RANDOM_STATE, max_iter=500)
-        return model, self._run(model, X_train, X_test, y_train, y_test) #vil ha modellen ikke chardetection objektet
+        return model, self._run(model, X_train, X_test, y_train, y_test)
 
     def random_forest_classifier(self, X_train, X_test, y_train, y_test):
         model = RandomForestClassifier(n_estimators=200, max_depth=100, random_state=self.RANDOM_STATE)
         return self._run(model, X_train, X_test, y_train, y_test)
 
     def save_model(self, model):
-        joblib.dump(model, '/Users/juliagraham/IT/TDT4173/Assignment 5 - Optical Character Recognition/models/model.pkl')
+        print(f"saving model --> {model}")
+        with open("/Users/wquole/PycharmProjects/TDT4173/Assignment 5 - Optical Character Recognition/models/model.pkl", 'wb') as f:
+            pickle.dump(model, f)
 
     def load_model(self, filePath):
-        return joblib.load(filePath)
+        with open(filePath, 'rb') as f:
+            model = pickle.load(f)
+            print(f"loading model --> {model}")
+            return model
+
+
+    def save_pca(self, pca):
+        print(f"saving PCA --> {pca}")
+        with open("/Users/wquole/PycharmProjects/TDT4173/Assignment 5 - Optical Character Recognition/models/pca.pkl", 'wb') as f:
+            pickle.dump(pca, f)
+
+    def load_pca(self, filePath):
+        with open(filePath, 'rb') as f:
+            loaded = pickle.load(f)
+            print(f"loading PCA -->")
+            return loaded

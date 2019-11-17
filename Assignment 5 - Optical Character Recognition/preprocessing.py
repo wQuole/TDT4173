@@ -18,11 +18,21 @@ def load_data(filePath):
                 img = cv2.imread(os.path.join(root, file), cv2.IMREAD_GRAYSCALE)
                 if img is not None:
                     img = img / 255 # normalize pixel values
-                    images.append(img.ravel()) # flatten (20, 20) to (400, )
+                    images.append(img.ravel()) # ravel (20, 20) to (400, )
                     classes.append(file[:1]) # append classification
-
-    # return train_test_split(images, classes, test_size=0.2, random_state=0, shuffle=False)
     return images, classes
+
+
+def load_single_image(filePath, fileName):
+    for root, dirs, files in sorted(os.walk(filePath)):
+        for file in files:
+            if file == fileName:
+                img = cv2.imread(os.path.join(root, file), cv2.IMREAD_GRAYSCALE)
+                if img is not None:
+                    img = img / 255 # normalize pixel values
+                    img = np.asarray(img)
+                    print(img.shape)
+    return img
 
 
 def create_dataframe_and_numpy_arrays(images, classes):
@@ -42,7 +52,9 @@ def standarscaler_transform(X):
 
 
 def pca_transform(X, n_c):
-    return PCA(n_c).fit_transform(X)
+    pca = PCA(n_c)
+    reduced = pca.fit_transform(X)
+    return reduced, pca
 
 
 def edge_detection(X_train):
