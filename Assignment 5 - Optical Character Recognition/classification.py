@@ -6,16 +6,19 @@ from sklearn.ensemble import RandomForestClassifier
 
 
 class CharacterClassifier:
-    def __init__(self, STATE):
+    def __init__(self, STATE, PROBABILITY):
         self.RANDOM_STATE = STATE
+        self.proba = PROBABILITY
 
     def _run(self, model, X_train, X_test, y_train, y_test):
         model.fit(X_train, y_train)
 
-        predictions = model.predict(X_test)
-        score = accuracy_score(y_test, predictions)
+        if self.proba:
+            return model.predict_proba(X_test)
+        else:
+            predictions = model.predict(X_test)
 
-        return score * 100
+        return accuracy_score(y_test, predictions) * 100
 
     def svm_classifier(self,X_train, X_test, y_train, y_test):
         model = svm.SVC(kernel="linear", probability=True, gamma=5.383, C=2.67)
@@ -27,6 +30,8 @@ class CharacterClassifier:
 
     def mlp_classifier(self, X_train, X_test, y_train, y_test):
         model = MLPClassifier(hidden_layer_sizes=(860,), random_state=self.RANDOM_STATE, max_iter=500)
+        if self.proba:
+            return self._run(model, X_train, X_test, y_train, y_test)
         return self._run(model, X_train, X_test, y_train, y_test)
 
     def random_forest_classifier(self, X_train, X_test, y_train, y_test):

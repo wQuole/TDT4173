@@ -6,6 +6,7 @@ from detection import CharacterDetector
 from sklearn.model_selection import train_test_split
 
 RANDOM_STATE = 42
+PROBABILITY = True
 
 if __name__ == '__main__':
     # Load and prep' data
@@ -18,7 +19,7 @@ if __name__ == '__main__':
     X_train, X_test, y_train, y_test = train_test_split(X_array, y_array, test_size=0.2, shuffle=True, random_state=RANDOM_STATE)
     X_train, X_test = preprocessing.edge_detection_transform(X_train, X_test)
     # Classifier
-    clf = CharacterClassifier(RANDOM_STATE)
+    clf = CharacterClassifier(RANDOM_STATE, PROBABILITY)
     predictions = clf.mlp_classifier(X_train, X_test, y_train, y_test)
     print(predictions)
     # Detection
