@@ -40,9 +40,7 @@ def standarscaler_transform(X):
     return StandardScaler().fit_transform(X)
 
 def pca_transform(X, n_c):
-    pca = PCA(n_components=n_c)
-    X_proj = pca.fit(X)
-    return pca.transform(X_proj)
+    return PCA(n_c).fit_transform(X)
 
 def sobel_filters(X_train):
     feature_vector = []

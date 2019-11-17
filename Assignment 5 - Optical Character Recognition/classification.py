@@ -27,7 +27,7 @@ class CharacterClassifier:
         return score*100
 
     def mlp_classifier(self, X_train, X_test, y_train, y_test):
-        model = MLPClassifier(hidden_layer_sizes=(1000,), random_state=self.RANDOM_SEED, max_iter=500)
+        model = MLPClassifier(hidden_layer_sizes=(860,), random_state=self.RANDOM_SEED, max_iter=500)
         model.fit(X_train, y_train)
 
         predictions = model.predict(X_test)

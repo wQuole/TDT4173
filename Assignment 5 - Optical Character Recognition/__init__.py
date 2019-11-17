@@ -1,5 +1,4 @@
 import os
-import numpy as np
 from classification import CharacterClassifier
 import preprocessing
 from sklearn.model_selection import train_test_split
@@ -13,23 +12,33 @@ if __name__ == '__main__':
     X, y, X_array, y_array = preprocessing.create_dataframe_and_numpy_arrays(images, classes)
     # Split data 80/20
     X_array = preprocessing.standarscaler_transform(X_array)
-    X_array = preprocessing.pca_transform(X_array, 40)
+    #X_array = preprocessing.pca_transform(X_array, 40)
     X_train, X_test, y_train, y_test = train_test_split(X_array, y_array, test_size=0.2, shuffle=True, random_state=RANDOM_STATE)
-    X_train, X_test = preprocessing.sobel_transform(X_train, X_test)
+    #X_train, X_test = preprocessing.hog_transform(X_train, X_test)
     # Classifier
     clf = CharacterClassifier(RANDOM_STATE)
-    predictions = clf.svm_classifier(X_train, X_test, y_train, y_test)
+    predictions = clf.mlp_classifier(X_train, X_test, y_train, y_test)
     print(predictions)
 
 
 '''
 TODO:
+- use pickle to save and load models
+- implement detection of characters
+
 checkout out:
+http://rpubs.com/Sharon_1684/454441
 https://www.pyimagesearch.com/2018/08/20/opencv-text-detection-east-text-detector/
 https://www.youtube.com/watch?v=NfiCmhLLxMA
+https://scikit-learn.org/stable/auto_examples/classification/plot_classifier_comparison.html#sphx-glr-auto-examples-classification-plot-classifier-comparison-py
 https://scikit-learn.org/stable/modules/generated/sklearn.pipeline.make_pipeline.html#sklearn.pipeline.make_pipeline
+https://scikit-learn.org/stable/modules/decomposition.html#pca
+https://scikit-learn.org/stable/auto_examples/preprocessing/plot_scaling_importance.html
 https://en.wikipedia.org/wiki/Eigenface
 https://www.algosome.com/articles/optical-character-recognition-java.html
+https://charlesreid1.github.io/circe/Digit%20Classification%20-%20PCA.html
+https://docs.opencv.org/master/d3/d02/tutorial_py_svm_index.html
+https://docs.opencv.org/master/d4/d86/group__imgproc__filter.html#gacea54f142e81b6758cb6f375ce782c8d
 '''
 
 
