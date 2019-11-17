@@ -1,6 +1,8 @@
 import os
-from classification import CharacterClassifier
 import preprocessing
+import cv2
+from classification import CharacterClassifier
+from detection import CharacterDetector
 from sklearn.model_selection import train_test_split
 
 RANDOM_STATE = 42
@@ -11,14 +13,20 @@ if __name__ == '__main__':
     images, classes = preprocessing.load_data(chars74k_lite)
     X, y, X_array, y_array = preprocessing.create_dataframe_and_numpy_arrays(images, classes)
     # Split data 80/20
+    X_array = preprocessing.pca_transform(X_array, 40)
     X_array = preprocessing.standarscaler_transform(X_array)
-    #X_array = preprocessing.pca_transform(X_array, 40)
     X_train, X_test, y_train, y_test = train_test_split(X_array, y_array, test_size=0.2, shuffle=True, random_state=RANDOM_STATE)
-    #X_train, X_test = preprocessing.hog_transform(X_train, X_test)
+    X_train, X_test = preprocessing.edge_detection_transform(X_train, X_test)
     # Classifier
     clf = CharacterClassifier(RANDOM_STATE)
     predictions = clf.mlp_classifier(X_train, X_test, y_train, y_test)
     print(predictions)
+    # Detection
+    detection_image = ""
+    d_img = cv2.imread(detection_image, 20, 20)
+    detector = CharacterDetector(d_img)
+    #detector.sliding_window()
+
 
 
 '''
