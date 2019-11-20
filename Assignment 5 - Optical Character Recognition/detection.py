@@ -64,7 +64,6 @@ class CharacterDetector:
 
             cv2.rectangle(self.img, (startX, startY), (endX, endY), (0, 255, 0), 1)  # draw rectangle on image
             cv2.putText(self.img, char, (startX, startY + 2 * self.scale), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 0), 1)
-            cv2.
             plt.imshow(self.img, cmap="gray", interpolation='nearest')
         plt.show()
 
