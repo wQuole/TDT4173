@@ -2,7 +2,19 @@ from os import path
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-from sklearn.linear_model import logistic
+
+
+def preprocess_data(filepath, transform=False):
+    df = pd.read_csv(filepath, names=['x1', 'x2', 'y'], header=None)
+    df.insert(0, 'x0', 1, True)  # Add new dimension because of merging bias into weight vector --> w0 = bias
+    X, y = df.values[:, [0, 1, 2]], df.values[:, -1]
+    if transform:
+        X_t = []
+        for row in X:
+            #row = np.insert(row, 1, np.sqrt(2)*row[0]*row[1])
+            X_t.append(np.power(row, 3))
+        X = np.asarray(X_t)
+    return X, y, df
 
 
 class LogisticRegression:
@@ -17,12 +29,6 @@ class LogisticRegression:
                 f"Iterations:\t{self.n_iterations}\n"
                 f"Bias:\t{self.bias}")
 
-    def preprocess_data(self, filepath):
-        df = pd.read_csv(filepath, names=['x1', 'x2', 'y'], header=None)
-        df.insert(0, 'x0', self.bias, True)  # Add new dimension because of merging bias into weight vector --> w0 = bias
-        X, y = df.values[:, [0, 1, 2]], df.values[:, -1]
-        return X, y, df
-
     @staticmethod
     def sigmoid(z):
         return 1/(1 + np.exp(-z))
@@ -33,6 +39,10 @@ class LogisticRegression:
 
     def predict(self, features, weights):
         return self.sigmoid(self.h(features, weights))
+
+    @staticmethod
+    def classify(prob):
+        return 1 if prob >= 0.5 else 0
 
     def cross_entropy(self, features, weights, labels):
         y_pred = self.predict(features, weights)
@@ -51,27 +61,30 @@ class LogisticRegression:
 
         return weights
 
-    def classify(self, predictions):
-        decisionBoundary = lambda prob: 1 if prob >= 0.5 else 0
-        return np.vectorize(decisionBoundary(predictions))
-
     def fit(self, features, labels, weights):
-        training_loss = []
+        loss = []
 
-        for i in range(self.n_iterations+1):
+        for i in range(self.n_iterations + 1):
             weights = self.gradient_descent(features, weights, labels)
             cost = self.cross_entropy(features, weights, labels)
             print(f"i\tCost: {cost}")
-            training_loss.append(cost)
+            loss.append(cost)
 
-            if i % 1000 == 0:
+            if i % 500 == 0:
                 print(f"Iteration: {i} weights:\n{weights}")
 
-        return weights, training_loss
+        return weights, loss
 
     def accuracy(self, predictions, actual):
-        diff = predictions - actual
-        return 1.0 - diff/len(diff)
+        hits, misses = 0.0, 0.0
+        for i in range(len(actual)):
+            print(f"P(x) = {round(predictions[i], 5)}\t--> {self.classify(predictions[i])}\t--> Actually: {actual[i]}")
+            if self.classify(predictions[i]) == actual[i]:
+                hits += 1.0
+            else:
+                misses += 1.0
+        print(f"Hits: {hits} | Misses: {misses}")
+        return hits/len(actual)
 
     @staticmethod
     def divide_data(features, labels):
@@ -82,50 +95,43 @@ class LogisticRegression:
                 positive.append(features[i])
             else:
                 negative.append(features[i])
+
         return positive, negative
 
     def visualize_training_data(self, x, y):
         p, n = self.divide_data(x, y)
 
         plt.scatter([x[1] for x in p], [x[2] for x in p], label='positive', c='#1f77b4')
-        plt.scatter([j[1] for j in neg], [j[2] for j in neg], label='negative', c='#ff7f0e')
-        plt.show()
-
-    def plot_decision_boundary(self, pos, neg):
-        fig = plt.figure()
-        ax = fig.add_subplot(111)
-
-        ax.scatter([x[1] for x in pos], [x[2] for x in pos], s=35, c='b', marker="o", label='Trues')
-        ax.scatter([j[1] for j in neg], [j[2] for j in neg], s=25, c='r', marker="s", label='Falses')
-
-        plt.legend(loc='upper right');
-        ax.set_title("Decision Boundary")
-        ax.set_xlabel('N/2')
-        ax.set_ylabel('Predicted Probability')
-        plt.axvline(.5, color='black')
+        plt.scatter([j[1] for j in n], [j[2] for j in n], label='negative', c='#ff7f0e')
         plt.show()
 
 
 if __name__ == '__main__':
-    train_data = path.abspath('dataset/classification/cl_train_1.csv')
-    test_data = path.abspath('dataset/classification/cl_test_1.csv')
+    # Linearly separable data
+    train_data_1 = path.abspath('dataset/classification/cl_train_1.csv')
+    test_data_1 = path.abspath('dataset/classification/cl_test_1.csv')
+    # NOT Linearly separable data
+    train_data_2 = path.abspath('dataset/classification/cl_train_2.csv')
+    test_data_2 = path.abspath('dataset/classification/cl_test_2.csv')
 
-    logit = LogisticRegression(0.05, 1000)
-    X_train, y_train, _ = logit.preprocess_data(train_data)
-    X_test, y_test, _ = logit.preprocess_data(test_data)
+    X_train, y_train, _ = preprocess_data(train_data_2, transform=True)
+    X_test, y_test, _ = preprocess_data(test_data_2, transform=True)
 
-    #pos, neg = logit.divide_data(X,y)
-    #logit.visualize_training_data(X, y)
+    logit = LogisticRegression(0.03, 2000)
+    pos, neg = logit.divide_data(X_train, y_train)
+    logit.visualize_training_data(X_train, y_train)
 
     initial_weights = np.zeros(X_train.shape[1])
     weights, train_loss = logit.fit(X_train, y_train, initial_weights)
-    _, test_loss = logit.fit(X_test, y_test, weights)
+    _, test_loss = logit.fit(X_test, y_test, initial_weights)
+
+    predictions = logit.predict(X_test, weights)
     print(logit)
+    print("Accuracy:\n", logit.accuracy(predictions, y_test))
+
     plt.plot(train_loss, c='#1f77b4')
     plt.plot(test_loss, c='#ff7f0e')
     plt.legend(("Training loss", "Test loss"))
     plt.title("Training vs Test Loss")
     plt.show()
-    # sklearnLogReg = logistic.LogisticRegression()
-    # a = sklearnLogReg.fit(X, y)
-    # print(f"Sklearn-LogReg()-weights:\n{a.coef_} after {sklearnLogReg.max_iter} iterations")
+
